@@ -305,8 +305,7 @@ def upload_ami(
     image_info: ImageInfo,
     s3_bucket: str,
     copy_to_regions: bool,
-    prefix: str,
-    run_id: str,
+    image_name: str,
     public: bool,
     dest_regions: list[str],
     enable_tpm: bool,
@@ -322,9 +321,6 @@ def upload_ami(
     s3: S3Client = boto3.client("s3")
 
     image_file = Path(image_info["file"])
-    label = image_info["label"]
-    system = image_info["system"]
-    image_name = prefix + label + "-" + system + ("." + run_id if run_id else "")
 
     image_format = image_info.get("format") or "VHD"
     snapshot_id = import_snapshot_if_not_exist(
@@ -366,9 +362,8 @@ def main() -> None:
     parser.add_argument("--copy-to-regions", action="store_true")
     parser.add_argument("--public", action="store_true")
     parser.add_argument(
-        "--prefix", required=True, help="Prefix to prepend to image name"
+        "--image-name", required=True, help="image name"
     )
-    parser.add_argument("--run-id", help="Run id to append to image name")
     parser.add_argument(
         "--dest-region",
         help="Regions to copy to if copy-to-regions is enabled",
@@ -402,8 +397,7 @@ def main() -> None:
         image_info,
         args.s3_bucket,
         args.copy_to_regions,
-        args.prefix,
-        args.run_id,
+        args.image_name,
         args.public,
         args.dest_region,
         args.enable_tpm,
